@@ -1,10 +1,13 @@
 {
-  "name": "dynamoose",
+  "name": "@invisit/dynamoose",
   "version": "2.4.1",
   "description": "Dynamoose is a modeling tool for Amazon's DynamoDB (inspired by Mongoose)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "homepage": "https://dynamoosejs.com",
+  "publishConfig": {
+    "access": "restricted"
+  },
   "directories": {
     "doc": "docs"
   },
@@ -55,6 +58,7 @@
     "url": "https://github.com/dynamoose/dynamoose/issues"
   },
   "dependencies": {
+    "@3fv/deferred": "^1.2.1",
     "aws-sdk": "^2.792.0",
     "source-map-support": "^0.5.19",
     "uuid": "^8.3.1"

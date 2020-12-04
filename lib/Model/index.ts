@@ -14,6 +14,7 @@ import {PopulateDocuments} from "../Populate";
 
 import {DynamoDB, AWSError} from "aws-sdk";
 import {GetTransactionInput, CreateTransactionInput, DeleteTransactionInput, UpdateTransactionInput, ConditionTransactionInput} from "../Transaction";
+import { Deferred } from "@3fv/deferred"
 
 // Defaults
 interface ModelWaitForActiveSettings {
@@ -298,14 +299,16 @@ export class Model<T extends DocumentCarrier = AnyDocument> {
 		this.schemas = realSchemas;
 
 		// Setup flow
+		const readyDeferred = this.readyDeferred = new Deferred<Model<T>>()
+		
 		this.ready = false; // Represents if model is ready to be used for actions such as "get", "put", etc. This property being true does not guarantee anything on the DynamoDB server. It only guarantees that Dynamoose has finished the initalization steps required to allow the model to function as expected on the client side.
 		this.alreadyCreated = false; // Represents if the table in DynamoDB was created prior to initalization. This will only be updated if `create` is true.
 		this.pendingTasks = []; // Represents an array of promise resolver functions to be called when Model.ready gets set to true (at the end of the setup flow)
 		this.latestTableDetails = null; // Stores the latest result from `describeTable` for the given table
 		this.pendingTaskPromise = (): Promise<void> => { // Returns a promise that will be resolved after the Model is ready. This is used in all Model operations (Model.get, Document.save) to `await` at the beginning before running the AWS SDK method to ensure the Model is setup before running actions on it.
-			return this.ready ? Promise.resolve() : new Promise((resolve) => {
+			return readyDeferred.promise.then(() => new Promise((resolve) => {
 				this.pendingTasks.push(resolve);
-			});
+			}));
 		};
 		const setupFlow = []; // An array of setup actions to be run in order
 		// Create table
@@ -334,7 +337,9 @@ export class Model<T extends DocumentCarrier = AnyDocument> {
 		setupFlowPromise.then(() => this.ready = true).then(() => {
 			this.pendingTasks.forEach((task) => task()); this.pendingTasks = [];
 		});
-
+		
+		setupFlowPromise.then(() => readyDeferred.resolve())
+		
 		const self: Model<DocumentCarrier> = this;
 		class Document extends DocumentCarrier {
 			static Model: Model<DocumentCarrier>;
@@ -395,7 +400,16 @@ export class Model<T extends DocumentCarrier = AnyDocument> {
 		const ModelStore = require("../ModelStore");
 		ModelStore(this);
 	}
-
+	
+	get readyPromise() {
+		return this.readyDeferred?.promise
+	}
+	
+	waitUntilReady() {
+		return this.readyDeferred.promise
+	}
+	
+	private readyDeferred: Deferred<Model<T>>;
 	name: string;
 	options: ModelOptions;
 	schemas: Schema[];
