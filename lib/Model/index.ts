@@ -94,7 +94,7 @@ type TransactionType = {
 };
 
 // Utility functions
-async function getTableDetails (model: Model<DocumentCarrier>, settings: {allowError?: boolean; forceRefresh?: boolean} = {}): Promise<DynamoDB.DescribeTableOutput> {
+export async function getTableDetails (model: Model<DocumentCarrier>, settings: {allowError?: boolean; forceRefresh?: boolean} = {}): Promise<DynamoDB.DescribeTableOutput> {
 	const func = async (): Promise<void> => {
 		const tableDetails: DynamoDB.DescribeTableOutput = await ddb("describeTable", {"TableName": model.name});
 		model.latestTableDetails = tableDetails; // eslint-disable-line require-atomic-updates
@@ -111,14 +111,14 @@ async function getTableDetails (model: Model<DocumentCarrier>, settings: {allowE
 
 	return model.latestTableDetails;
 }
-async function createTableRequest (model: Model<DocumentCarrier>): Promise<DynamoDB.CreateTableInput> {
+export async function createTableRequest (model: Model<DocumentCarrier>): Promise<DynamoDB.CreateTableInput> {
 	return {
 		"TableName": model.name,
 		...utils.dynamoose.get_provisioned_throughput(model.options),
 		...await model.getCreateTableAttributeParams()
 	};
 }
-async function createTable (model: Model<DocumentCarrier>): Promise<void | (() => Promise<void>)> {
+export async function createTable (model: Model<DocumentCarrier>): Promise<void | (() => Promise<void>)> {
 	if (((await getTableDetails(model, {"allowError": true}) || {}).Table || {}).TableStatus === "ACTIVE") {
 		model.alreadyCreated = true;
 		return (): Promise<void> => Promise.resolve.bind(Promise)();
@@ -126,7 +126,7 @@ async function createTable (model: Model<DocumentCarrier>): Promise<void | (() =
 
 	await ddb("createTable", await createTableRequest(model));
 }
-async function updateTimeToLive (model: Model<DocumentCarrier>): Promise<void> {
+export async function updateTimeToLive (model: Model<DocumentCarrier>): Promise<void> {
 	let ttlDetails;
 
 	async function updateDetails (): Promise<void> {
@@ -160,7 +160,7 @@ async function updateTimeToLive (model: Model<DocumentCarrier>): Promise<void> {
 		break;
 	}
 }
-function waitForActive (model: Model<DocumentCarrier>, forceRefreshOnFirstAttempt = true) {
+export function waitForActive (model: Model<DocumentCarrier>, forceRefreshOnFirstAttempt = true) {
 	return (): Promise<void> => new Promise((resolve, reject) => {
 		const start = Date.now();
 		async function check (count: number): Promise<void> {
@@ -186,7 +186,7 @@ function waitForActive (model: Model<DocumentCarrier>, forceRefreshOnFirstAttemp
 		check(0);
 	});
 }
-async function updateTable (model: Model<DocumentCarrier>): Promise<void> {
+export async function updateTable (model: Model<DocumentCarrier>): Promise<void> {
 	const updateAll = typeof model.options.update === "boolean" && model.options.update;
 	// Throughput
 	if (updateAll || (model.options.update as ModelUpdateOptions[]).includes(ModelUpdateOptions.throughput)) {

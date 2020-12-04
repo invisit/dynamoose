@@ -1,5 +1,6 @@
 import "source-map-support/register";
 
+import * as ModelNS from "./Model"
 import {Model, ModelOptionsOptional} from "./Model";
 import {Schema, SchemaDefinition} from "./Schema";
 import {Condition} from "./Condition";
@@ -65,13 +66,17 @@ model.defaults = {
 	...require("./Model/defaults").custom
 };
 
-export = {
+const UNDEFINED = Internal.Public.undefined
+const THIS =  Internal.Public.this
+
+export {
+	ModelNS as Model,
 	model,
 	Schema,
 	Condition,
 	transaction,
 	aws,
 	logger,
-	"UNDEFINED": Internal.Public.undefined,
-	"THIS": Internal.Public.this
+	UNDEFINED,
+	THIS
 };
