@@ -32,7 +32,7 @@ export interface DynamoDBTypeResult {
 	set?: DynamoDBSetTypeResult;
 }
 
-interface DynamoDBTypeCreationObject {
+export interface DynamoDBTypeCreationObject {
 	name: string;
 	dynamicName?: ((typeSettings?: AttributeDefinitionTypeSettings) => string);
 	dynamodbType: string | string[] | DynamoDBType | ((typeSettings: AttributeDefinitionTypeSettings) => string | string[]);
@@ -43,7 +43,7 @@ interface DynamoDBTypeCreationObject {
 	customDynamoName?: string | ((typeSettings?: AttributeDefinitionTypeSettings) => string);
 }
 
-class DynamoDBType implements DynamoDBTypeCreationObject {
+export class DynamoDBType implements DynamoDBTypeCreationObject {
 	// TODO: since the code below will always be the exact same as DynamoDBTypeCreationObject we should see if there is a way to make it more DRY and not repeat it
 	name: string;
 	dynamicName?: ((typeSettings?: AttributeDefinitionTypeSettings) => string);
@@ -221,33 +221,33 @@ const attributeTypesMain: DynamoDBType[] = ((): DynamoDBType[] => {
 })();
 const attributeTypes: (DynamoDBTypeResult | DynamoDBSetTypeResult)[] = utils.array_flatten(attributeTypesMain.filter((checkType) => !checkType.customType).map((checkType) => checkType.result()).map((a) => [a, a.set])).filter((a) => Boolean(a));
 
-type SetValueType = {wrapperName: "Set"; values: ValueType[]; type: string /* TODO: should probably make this an enum */};
-type GeneralValueType = string | boolean | number | Buffer | Date;
+export type SetValueType = {wrapperName: "Set"; values: ValueType[]; type: string /* TODO: should probably make this an enum */};
+export type GeneralValueType = string | boolean | number | Buffer | Date;
 export type ValueType = GeneralValueType | {[key: string]: ValueType} | ValueType[] | SetValueType;
-type AttributeType = string | StringConstructor | BooleanConstructor | NumberConstructor | typeof Buffer | DateConstructor | ObjectConstructor | ArrayConstructor | SetConstructor | Schema;
+export type AttributeType = string | StringConstructor | BooleanConstructor | NumberConstructor | typeof Buffer | DateConstructor | ObjectConstructor | ArrayConstructor | SetConstructor | Schema;
 
 export interface TimestampObject {
 	createdAt?: string | string[];
 	updatedAt?: string | string[];
 }
-interface SchemaSettings {
+export interface SchemaSettings {
 	timestamps?: boolean | TimestampObject;
 	saveUnknown?: boolean | string[];
 }
-interface IndexDefinition {
+export interface IndexDefinition {
 	name?: string;
 	global?: boolean;
 	rangeKey?: string;
 	project?: boolean | string[];
 	throughput?: "ON_DEMAND" | number | {read: number; write: number};
 }
-interface AttributeDefinitionTypeSettings {
+export interface AttributeDefinitionTypeSettings {
 	storage?: "miliseconds" | "seconds";
 	model?: ModelType<Document>;
 	attributes?: string[];
 	seperator?: string;
 }
-interface AttributeDefinition {
+export interface AttributeDefinition {
 	type: AttributeType | {value: DateConstructor; settings?: AttributeDefinitionTypeSettings} | {value: AttributeType}; // TODO add support for this being an object
 	schema?: AttributeType | AttributeType[] | AttributeDefinition | AttributeDefinition[] | SchemaDefinition | SchemaDefinition[];
 	default?: ValueType | (() => ValueType);
@@ -264,10 +264,10 @@ interface AttributeDefinition {
 export interface SchemaDefinition {
 	[attribute: string]: AttributeType | AttributeDefinition;
 }
-interface SchemaGetAttributeTypeSettings {
+export interface SchemaGetAttributeTypeSettings {
 	unknownAttributeAllowed: boolean;
 }
-interface SchemaGetAttributeSettingValue {
+export interface SchemaGetAttributeSettingValue {
 	returnFunction: boolean;
 }
 
