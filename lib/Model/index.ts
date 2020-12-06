@@ -28,7 +28,7 @@ import {
 } from "../Transaction";
 
 // Defaults
-interface ModelWaitForActiveSettings {
+export interface ModelWaitForActiveSettings {
   enabled:boolean;
   check:{ timeout:number; frequency:number };
 }
@@ -65,11 +65,11 @@ type KeyObject = { [attribute:string]:string | number };
 type InputKey = string | KeyObject;
 
 // Transactions
-type GetTransactionResult = Promise<GetTransactionInput>;
-type CreateTransactionResult = Promise<CreateTransactionInput>;
-type DeleteTransactionResult = Promise<DeleteTransactionInput>;
-type UpdateTransactionResult = Promise<UpdateTransactionInput>;
-type ConditionTransactionResult = Promise<ConditionTransactionInput>;
+export type GetTransactionResult = Promise<GetTransactionInput>;
+export type CreateTransactionResult = Promise<CreateTransactionInput>;
+export type DeleteTransactionResult = Promise<DeleteTransactionInput>;
+export type UpdateTransactionResult = Promise<UpdateTransactionInput>;
+export type ConditionTransactionResult = Promise<ConditionTransactionInput>;
 
 export interface GetTransaction {
   (key:InputKey):GetTransactionResult;
