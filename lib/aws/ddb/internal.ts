@@ -1,7 +1,8 @@
 import * as ddb from "./index";
 import log = require("../../logger/emitter");
 import {DynamoDB} from "aws-sdk";
-
+import {asOption} from "@3fv/prelude-ts";
+import { isPromise } from "@3fv/deferred/Guards"
 // Table
 function main (method: "describeTable", params: DynamoDB.DescribeTableInput): Promise<DynamoDB.DescribeTableOutput>;
 function main (method: "createTable", params: DynamoDB.CreateTableInput): Promise<DynamoDB.CreateTableOutput>;
@@ -27,14 +28,24 @@ function main (method: "transactWriteItems", params: DynamoDB.TransactWriteItems
 
 function main (method: string, params: any): Promise<any> {
 	log({"level": "debug", "category": `aws:dynamodb:${method}:request`, "message": JSON.stringify(params, null, 4), "payload": {"request": params}});
-	return ddb()[method](params).promise()
-		.then(result => {
-			log({"level": "debug", "category": `aws:dynamodb:${method}:response`, "message": typeof result === "undefined" ? "undefined" : JSON.stringify(result, null, 4), "payload": {"response": result}});
-			return result
-		})
-	
+	return asOption(ddb()[method](params).promise() as Promise<any>)
 		
-	
+		.map((promise) =>
+			asOption(promise)
+				.filter(isPromise)
+				.map(promise =>
+			promise.then((result) => {
+			log({"level": "debug", "category": `aws:dynamodb:${method}:response`, "message": typeof result === "undefined" ? "undefined" : JSON.stringify(result, null, 4), "payload": {"response": result}});
+			return result;
+		}))
+				.getOrCall(() => {
+					console.warn("Not a promise", promise)
+					return Promise.resolve(promise);
+				}))
+		.get();
+
+
+
 }
 
 export = main;

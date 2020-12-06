@@ -2,7 +2,7 @@ import CustomError = require("./Error");
 import utils = require("./utils");
 import Internal = require("./Internal");
 import {Document, DocumentObjectFromSchemaSettings} from "./Document";
-import {Model} from "./Model";
+import { Model, ModelOptions } from "./Model"
 import {DynamoDB} from "aws-sdk";
 import {ModelType, ObjectType} from "./General";
 
@@ -269,6 +269,14 @@ export interface SchemaGetAttributeTypeSettings {
 }
 export interface SchemaGetAttributeSettingValue {
 	returnFunction: boolean;
+}
+
+export async function toDynamoDefinition(model: Model<Document>, settings:SchemaSettings, options: ModelOptions) {
+	return {
+		"TableName": model.name,
+		...utils.dynamoose.get_provisioned_throughput(options),
+		...await model.getCreateTableAttributeParams()
+	}
 }
 
 export class Schema {

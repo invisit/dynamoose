@@ -2,7 +2,7 @@ import "source-map-support/register";
 
 import * as ModelNS from "./Model";
 import {Model, ModelOptionsOptional} from "./Model";
-import {Schema, SchemaDefinition, SchemaSettings} from "./Schema";
+import { Schema, SchemaDefinition, SchemaSettings, toDynamoDefinition } from "./Schema"
 import {Condition} from "./Condition";
 import transaction from "./Transaction";
 import aws = require("./aws");
@@ -77,6 +77,7 @@ const THIS = Internal.Public.this;
 export = {
 	"Model":ModelNS,
 	model,
+	toDynamoDefinition,
 	Schema,
 	Condition,
 	transaction,
