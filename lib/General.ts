@@ -8,7 +8,7 @@ export type FunctionType = (...args: any[]) => any;
 export type DeepPartial<T> = {[P in keyof T]?: DeepPartial<T[P]>};
 
 // - Dynamoose
-interface ModelDocumentConstructor<T extends Document> {
+export interface ModelDocumentConstructor<T extends Document> {
 	new (object: {[key: string]: any}): T;
 	Model: Model<T>;
 }

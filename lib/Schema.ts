@@ -271,7 +271,7 @@ export interface SchemaGetAttributeSettingValue {
 	returnFunction: boolean;
 }
 
-export async function toDynamoDefinition(model: Model<Document>, settings:SchemaSettings, options: ModelOptions) {
+export async function toDynamoDefinition(model: Model<Document>, options: ModelOptions = model.options) {
 	return {
 		"TableName": model.name,
 		...utils.dynamoose.get_provisioned_throughput(options),
