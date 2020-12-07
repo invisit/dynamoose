@@ -318,35 +318,35 @@ export async function updateTable (model:Model<DocumentCarrier>):Promise<void> {
 	}
 }
 
-interface ModelGetSettings {
+export interface ModelGetSettings {
   return?:"document" | "request";
   attributes?:string[];
   consistent?:boolean;
 }
 
-interface ModelDeleteSettings {
+export interface ModelDeleteSettings {
   return?:null | "request";
   condition?:Condition;
 }
 
-interface ModelBatchPutSettings {
+export interface ModelBatchPutSettings {
   return?:"response" | "request";
 }
 
-interface ModelUpdateSettings {
+export interface ModelUpdateSettings {
   return?:"document" | "request";
   condition?:Condition;
 }
 
-interface ModelBatchGetDocumentsResponse<T> extends DocumentArray<T> {
+export interface ModelBatchGetDocumentsResponse<T> extends DocumentArray<T> {
   unprocessedKeys:ObjectType[];
 }
 
-interface ModelBatchGetSettings {
+export interface ModelBatchGetSettings {
   return?:"documents" | "request";
 }
 
-interface ModelBatchDeleteSettings {
+export interface ModelBatchDeleteSettings {
   return?:"response" | "request";
 }
 
