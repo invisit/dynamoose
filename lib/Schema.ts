@@ -724,7 +724,9 @@ Schema.prototype.getAttributeValue = function (this: Schema, key: string, settin
 };
 
 function retrieveTypeInfo (type: string, isSet: boolean, key: string, typeSettings: AttributeDefinitionTypeSettings): DynamoDBTypeResult | DynamoDBSetTypeResult {
-	const foundType = attributeTypesMain.find((checkType) => checkType.name.toLowerCase() === type.toLowerCase());
+	const foundType = attributeTypesMain.find((checkType) =>
+		checkType?.name?.toLowerCase?.() === type?.toLowerCase?.()
+	);
 	if (!foundType) {
 		throw new CustomError.InvalidType(`${key} contains an invalid type: ${type}`);
 	}
@@ -784,7 +786,7 @@ Schema.prototype.getAttributeTypeDetails = function (this: Schema, key: string, 
 		}
 
 		let type = getType(item);
-		const isSet = type.toLowerCase() === "set";
+		const isSet = type?.toLowerCase?.() === "set";
 		if (isSet) {
 			let schemaValue = this.getAttributeSettingValue("schema", key);
 			if (Array.isArray(schemaValue[index])) {
