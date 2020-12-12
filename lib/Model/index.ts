@@ -26,6 +26,7 @@ import {
 	UpdateTransactionInput,
 	ConditionTransactionInput
 } from "../Transaction";
+import { asOption } from "@3fv/prelude-ts"
 
 // Defaults
 export interface ModelWaitForActiveSettings {
@@ -456,7 +457,13 @@ export class Model<T extends DocumentCarrier = AnyDocument> {
 				return typeof flow === "function" ? flow() : flow;
 			});
 		}, Promise.resolve());
-		setupFlowPromise.then(() => this.ready = true).then(() => {
+		const flagReady = () => {
+			this.ready = true
+		}
+		if (!setupFlow.length) {
+			flagReady()
+		}
+		setupFlowPromise.then(() => flagReady()).then(() => {
 			this.pendingTasks.forEach((task) => task());
 			this.pendingTasks = [];
 		});
@@ -1400,10 +1407,17 @@ export class Model<T extends DocumentCarrier = AnyDocument> {
   		"modifiers": ["get"],
   		"type": "fromDynamo"
   	};
-  	const documentify = (document:DynamoDB.AttributeMap):Promise<DocumentCarrier> => new this.Document(
-      document as any,
-      {"type": "fromDynamo"}
-  	).conformToSchema(conformToSchemaSettings);
+  	const documentify = async (document:DynamoDB.AttributeMap):Promise<DocumentCarrier> => {
+		
+		  const doc = new this.Document(
+			  document as any,
+			  { "type": "fromDynamo" }
+		  )
+		
+		  const result = await doc.conformToSchema(conformToSchemaSettings);
+		  console.log("doc'ed", result)
+		  return result
+	  }
 
   	const getItemParams:DynamoDB.GetItemInput = {
   		"Key": this.Document.objectToDynamo(this.convertObjectToKey(key)),
@@ -1428,7 +1442,8 @@ export class Model<T extends DocumentCarrier = AnyDocument> {
   			return getItemParams;
   		}
   	}
-  	const promise = this.pendingTaskPromise().then(() => ddb("getItem", getItemParams));
+  	//this.pendingTaskPromise().then(() =>
+  	const promise =  ddb("getItem", getItemParams);
 
   	if (callback) {
   		const localCallback:CallbackType<DocumentCarrier, AWSError> = callback as CallbackType<DocumentCarrier, AWSError>;
@@ -1436,12 +1451,24 @@ export class Model<T extends DocumentCarrier = AnyDocument> {
   			.then((response) => localCallback(null, response))
   			.catch((error) => callback(error));
   	} else {
-  		return (
-  			async ():Promise<any> => {
-  				const response = await promise;
-  				return response.Item ? await documentify(response.Item) : undefined;
-  			}
-  		)();
+  		return promise.then(async res => {
+  			const item = res.Item
+		  
+					if (!!item) {
+						const result = await documentify(item)
+						console.log("RESULT", result)
+						return result
+					} else {
+						return Promise.reject("Unable to get item")
+					}
+			  
+			  }) as any
+			  //.getOrCall(() => Promise.resolve(undefined))) as any
+  		// 	async ():Promise<any> => {
+  		// 		const response = await promise;
+  		// 		return response.Item ? await documentify(response.Item) : undefined;
+  		// 	}
+  		// )();
   	}
   }
 
